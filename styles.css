@@ -1,0 +1,9 @@
+.center {
+    display: flex;
+    margin: auto;
+
+    justify-content: space-evenly;
+    /* border: 3px solid black; */
+}
+.box {
+}

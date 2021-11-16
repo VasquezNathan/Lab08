@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel = "stylesheet" href="styles.css">
+        <script src = "script.js"></script>
+    </head>
+    <body>
+        <div class = "center">
+            <div>
+                <h1>Search</h1>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name"><br><br>
+                <input type="button" value="Search" onclick = "loadGrades()">
+                <p>type full name to lookup grade. <br>If left blank all grades will be returned</p>
+                <p id = "bruh"></p>
+            </div>
+            <div>
+                <h1>Add</h1>
+                <label for = "addname">Name:</label>
+                <input type = "text" id = "addname" name = "addname"><br><br>
+                <label for = "addgrade">Grade:</label>
+                <input type = "text" id = "addgrade" name = "addgrade"><br><br>
+                <input type = "button" value = "Submit" onclick = "addGrade()">
+                <p>type full name and grade to add to the gradebook</p>
+                <p id = "addbruh"></p>
+            </div>
+            <div>
+                <h1>Delete</h1>
+                <label for = "delname">Name:</label>
+                <input type = "text" id = "delname" name = "delname"><br><br>
+                <input type = "button" value = "submit" onclick = "delGrade()">
+                <p">type full name to delete a grade</p>
+                <p id = "delbruh"></p>
+            </div>
+            <div>
+                <h1>Edit</h1>
+                <lable for = "editname">Name:</lable>
+                <input type = "text" id = "editname" name = "editname"><br><br>
+                <label for = "editgrade">Grade:</label>
+                <input type = "text" id = "editgrade" name = "editgrade"><br><br>
+                <input type = "button" value = "Submit" onclick = "editGrade()">
+                <p>type full name and updated grade</p>
+                <p id = "editbruh"></p>
+            </div>
+        </div>
+    </body>
+</html>
