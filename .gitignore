@@ -190,3 +190,4 @@ c/.idea/c.iml
 /dataSources/
 /dataSources.local.xml
 /httpRequests/
+*.pyc
