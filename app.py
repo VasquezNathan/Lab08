@@ -1,66 +1,97 @@
-from os import abort
-from flask.helpers import url_for
-from flask_admin import Admin
-from flask_admin.contrib import sqla
-from flask_login import LoginManager, current_user, login_user, login_required
-from flask_login.utils import login_required
+from logging import debug
+from flask.templating import render_template
 from werkzeug.utils import redirect
 from werkzeug.wrappers import response
+from wtforms import StringField, PasswordField
+from wtforms.validators import InputRequired
+from flask_wtf import FlaskForm
+from flask_login import LoginManager, login_required, logout_user, current_user
+from flask_bootstrap import Bootstrap
 from api import *
 
-
-# set optional bootswatch theme
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///example.sqlite'
-
-
-# all bullshit from the slides
-app.secret_key = 'super secret key'
+# some bullshit from the slides
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# also bullshit from the slides
-@login_manager.user_loader 
-def load_user(user_id): 
-   return User.get_id(user_id)
+# so the html files in the templates folder work
+bootstrap = Bootstrap(app)
 
-# /login directory
-@app.route("/login", methods=['GET', 'POST'])
+# form classes for the templates in the template folder
+class LoginForm(FlaskForm):
+    username = StringField('username', validators=[InputRequired()])
+    password = PasswordField('password', validators=[InputRequired()])
+
+class RegisterForm(FlaskForm):
+    username = StringField('username', validators=[InputRequired()])
+    password = PasswordField('password', validators=[InputRequired()])
+    confpass = PasswordField('confirm password', validators=[InputRequired()])
+
+# some more shit from the slides, returns user by id for some reason idk why
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+# redirect main directory to login (should have to login before using app)
+@app.route('/')
+def index():
+    return redirect('/login')
+
+# login directory
+@app.route('/login', methods = ['GET','POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    form = LoginForm()
 
-        # check password against User db
-        if User.query.filter_by(username=username).first() is not None and password == User.query.filter_by(username=username).first().password:
-            login_user(User.query.filter_by(username=username).first())
-            return redirect('admin')
+    # if method is post then check was was posted, otherwise serve templates/login.html
+    if (request.method == 'POST'):
+        
+        # I think these ifs can be combined but fck it
+        # make sure user exists in user table
+        if (User.query.filter_by(username = form.username.data).first() is not None):
+            # if the user exists then check the password, this way only log in if user exists and password is correct
+            if(User.query.filter_by(username = form.username.data).first().password == form.password.data):
+                return '<p> logged in </p>'
         else:
-            return redirect(url_for('login'))
-    else:
-        return '''
-        <form action="" method="post">
-            <p><input type=text name=username>
-            <p><input type=password name=password>
-            <p><input type=submit value=Login>
-        </form>
-        '''
+            # otherwise tell user to try again
+            return '<a href=\'/login\'>wrong username or password, click here to try again</a>'
+    
+    return render_template('home.html', name = current_user)
 
-# route /admin should need a login before it can be accessed
-@app.route('/admin')
+
+# sing up directory
+@app.route('/register', methods = ['GET', 'POST'])
+def register():
+    form = RegisterForm()
+
+    if (request.method == 'POST'):
+        
+        # only add to db if user does not exist
+        if (User.query.filter_by(username = form.username.data).first() is not None):
+            return '<a href=\'/register\'>username already exists, click here to try again.</a>'
+        
+        # next make sure passwords match
+        if (form.confpass.data != form.password.data):
+            return '<a href=\'/register\'>passwords did not match, click here to try again.</a>'
+        
+        # if username not already taken and passwords match then add to db
+        db.session.add(User(username = form.username.data, password = form.password.data))
+        db.session.commit()
+        return '<a href=\'/login\'>account created, click here to head to login</a>'
+    
+    # if the request method is not POST then serve the register page.
+    return render_template('register.html', form = form)
+
+@app.route('/logout')
 @login_required
-def hello():
-    return response.Response(status=200)
+def logout():
+    logout_user()
+    return 'fucked logout'
 
-class UserView(sqla.ModelView): 
-    can_delete = False # disable model deletion 
-    can_create = False # disable model creation 
-    can_edit = False # disable model editing 
+@app.route('/home')
+@login_required
+def home():
+    return render_template('home.html', name = current_user)
 
-
-admin = Admin(app, name='Gradebook') 
-admin.add_view(UserView(User, db.session)) 
-
-db.create_all()
-# Add administrative views here
-app.run() 
+if __name__ == '__main__':
+    app.run()
