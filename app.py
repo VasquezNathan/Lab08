@@ -1,5 +1,6 @@
 from logging import debug
 from flask.templating import render_template
+from flask_login.utils import login_user
 from werkzeug.utils import redirect
 from werkzeug.wrappers import response
 from wtforms import StringField, PasswordField
@@ -36,7 +37,7 @@ def load_user(user_id):
 # redirect main directory to login (should have to login before using app)
 @app.route('/')
 def index():
-    return redirect('/login')
+    return redirect('/home')
 
 # login directory
 @app.route('/login', methods = ['GET','POST'])
@@ -51,12 +52,14 @@ def login():
         if (User.query.filter_by(username = form.username.data).first() is not None):
             # if the user exists then check the password, this way only log in if user exists and password is correct
             if(User.query.filter_by(username = form.username.data).first().password == form.password.data):
-                return '<p> logged in </p>'
+                user = User.query.filter_by(username = form.username.data).first()
+                login_user(user)
+                return redirect('/home')
         else:
             # otherwise tell user to try again
             return '<a href=\'/login\'>wrong username or password, click here to try again</a>'
     
-    return render_template('home.html', name = current_user)
+    return render_template('login.html', form = form)
 
 
 # sing up directory
@@ -82,12 +85,12 @@ def register():
     # if the request method is not POST then serve the register page.
     return render_template('register.html', form = form)
 
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return 'fucked logout'
-
+    return '<a href=\'/login\'>logged out. click here to log back in</p>'
 @app.route('/home')
 @login_required
 def home():
