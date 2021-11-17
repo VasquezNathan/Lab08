@@ -12,25 +12,27 @@ from api import *
 # set optional bootswatch theme
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///example.sqlite'
 
-app.secret_key = 'super secret key'
 
+# all bullshit from the slides
+app.secret_key = 'super secret key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-
+# also bullshit from the slides
 @login_manager.user_loader 
 def load_user(user_id): 
    return User.get_id(user_id)
 
+# /login directory
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # print(User.query.filter_by(username=username).first())   /  
+
+        # check password against User db
         if User.query.filter_by(username=username).first() is not None and password == User.query.filter_by(username=username).first().password:
-            # User.query.filter_by(username=username).first().id
             login_user(User.query.filter_by(username=username).first())
             return redirect('admin')
         else:
@@ -44,8 +46,7 @@ def login():
         </form>
         '''
 
-
-
+# route /admin should need a login before it can be accessed
 @app.route('/admin')
 @login_required
 def hello():
