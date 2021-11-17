@@ -91,10 +91,11 @@ def register():
 def logout():
     logout_user()
     return '<a href=\'/login\'>logged out. click here to log back in</p>'
+
 @app.route('/home')
 @login_required
 def home():
-    return render_template('home.html', name = current_user)
+    return render_template('home.html', name = current_user.username)
 
 if __name__ == '__main__':
     app.run()
