@@ -112,6 +112,7 @@ def home():
             enrolled = str(str(Class.query.filter_by(id = row.class_id).first().enrolled))
             capacity = str(str(Class.query.filter_by(id = row.class_id).first().capacity))
             class_id_list.append(row.class_id)
+            print(class_id_list)
             # build table
             grades_table += '<tr> <td>' + course_name + '</td>'
             grades_table += '<td>' + instructor + '</td>'
@@ -129,9 +130,12 @@ def home():
             capacity = str(row.capacity)
 
             if row.id in class_id_list:
-                add = 'add'
-            else:
                 add = '-'
+            else:
+                if row.enrolled >= row.capacity:
+                    add = 'full'
+                else:
+                    add = 'add'
 
             all_classes += '<tr> <td>' + course_name + '</td>'
             all_classes += '<td>' + instructor + '</td>'
