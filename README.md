@@ -35,3 +35,11 @@ comment the following lines in app.py:::
    if not os.path.exists(database_path):
       build_sample_db()
    ```
+notes from nate:
+
+to populate the database with the csv file given.csv run
+
+   ```
+   sqlite3 example.sqlite < populate.sql
+   ```
+sqlite 3.33.0 is the minimum requirement. Some trouble I ran into on macOS BigSur: after running `brew upgrade sqlite` brew installed sqlite3 to `/usr/local/cellar/sqlite/3.36.0/bin/sqlite3`. you can either add this to the beginning of $PATH or move the brew installed sqlite3 file to `/usr/local/bin`
