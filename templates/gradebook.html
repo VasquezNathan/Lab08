@@ -1,0 +1,26 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+    <head>
+    </head>
+    <a href='/logout'>Logout</a>
+    <h1>Welcome {{ name }}, to your {{ id }} gradebook.</h1>
+    <h2>Your gradebook:</h2>
+    <div id = "bruh">
+        <table border="1">
+            {{ grades|safe }}
+        </table>
+    </div>
+    <a href = '/home'>back</a>
+    <script>    
+        function passGrade(id) {
+            var grade = document.getElementById(id).value;
+            
+            console.log(grade);
+        }
+    </script>
+{% endblock %}

@@ -146,9 +146,24 @@ def home():
             all_classes += '<td>' + capacity + '</td>'
             all_classes += '<td>' + add + '</td></tr>'
         return render_template('home.html',name = current_user.username, id = 'student', grades = grades_table, total = all_classes)
-
     else:
-        return render_template('home.html', name = current_user.username, id = 'teacher')
+        teacher_id = Teacher.query.filter_by(user_id = current_user.id).first().id
+        grades_table = '<tr><th>Course Name</th><th>Instructor</th><th>Time</th><th>Enrolled</th><th>Capacity</th></tr>'
+
+        for row in Class.query.filter_by(teacher_id = teacher_id).all():
+            course_name = '<a href=/gradebook/' + str(row.id) + '>' + row.course_name + '</a>'
+            instructor = Teacher.query.filter_by(id = teacher_id).first().name
+            time = row.time
+            enrolled = str(row.enrolled)
+            capacity = str(row.capacity)
+
+            grades_table += '<tr> <td>' + course_name + '</td>'
+            grades_table += '<td>' + instructor + '</td>'
+            grades_table += '<td>' + time + '</td>'
+            grades_table += '<td>' + enrolled + '</td>'
+            grades_table += '<td>' + capacity + '</td></tr>'
+
+        return render_template('home.html', name = current_user.username, id = 'teacher', grades = grades_table)
 
 @app.route('/add/<id>')
 @login_required
@@ -179,6 +194,32 @@ def drop(id):
 
     db.session.commit()
     return redirect('/home')
+
+@app.route('/gradebook/<id>')
+@login_required
+def gradeBook(id):
+    class_id_list = []
+    teacher_id = Teacher.query.filter_by(user_id = current_user.id).first().id
+    gradebook = '<tr> <th>Student Name</th> <th>Grade</th> </tr>'
+    class_name = Class.query.filter_by(id = id).first().course_name
+    for row in Class.query.filter_by(teacher_id = teacher_id).all():
+        class_id_list.append(row.id)
+    print(class_id_list)
+
+
+    # make sure that only the instructor of the class can access the gradebook
+    if int(id) not in class_id_list:
+        return '<p> access restricted </p> '
+
+    for row in Enrollment.query.filter_by(class_id = id).all():
+        student_name = Student.query.filter_by(id = row.student_id).first().name
+        grade = str(row.grade)
+
+        gradebook += '<tr> <td> ' + student_name + '</td>'
+        # gradebook += '<td id = \"' + str(row.id) + '\"contenteditable=\"true\" style = \"overflow: hidden\">' + grade + '</td> <td><button onclick = \"passGrade(' + str(row.id) + ')\">bruh</button></td></tr>'
+        gradebook += '<td>' + '<input type = \"number\" value = \"' + grade + '\" id = \"' + str(row.id) + '\"> </td> <td> <input type = \"button\" value = \"update\" onclick = \"passGrade(' + str(row.id) + ')\"></td></tr>'
+
+    return render_template('gradebook.html', name = current_user.username, id = class_name, grades = gradebook)
 
 if __name__ == '__main__':
     app.run()

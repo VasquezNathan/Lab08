@@ -11,8 +11,10 @@ Dashboard
     <table border="1">
         {{ grades|safe }}
     </table>
+    {% if id == 'student' %}
     <h2>All Courses:</h2>
     <table border="1">
         {{ total|safe }}
     </table>
+    {% endif %}
 {% endblock %}
